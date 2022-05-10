@@ -32,7 +32,7 @@ const player = (nam, dat, col) => {
 
 }
 
-let one = player('one', 'x', 'red');
+let one = player('one', 'x', '#309797');
 let two = player('two', 'r', 'blue');
 
 let gameBoard = (function () {
@@ -80,8 +80,14 @@ let gameBoard = (function () {
         return true;
     }
 
+    function disableBoard () {
+        for (let i=0; i<cells.length; i++) {
+            cells[i].disabled = true;
+        }
+    }
+
     return {
-        clearBoard, getCells, checkBoardIsFull
+        clearBoard, getCells, checkBoardIsFull, disableBoard
     }
 })();
 
@@ -95,16 +101,30 @@ let gameDisplay = (function () {
         p2.firstChild.textContent = player2.getName();
     }
 
-    function highlightPlayer (name) {
-        if (p1.firstChild.textContent == name) p1.classList.add('active');
-        else p1.classList.remove('active');
-        if (p2.firstChild.textContent == name) p2.classList.add('active');
-        else p2.classList.remove('active');
+    function highlightPlayer (name, color) {
+        if (p1.firstChild.textContent == name) {
+            p1.classList.add('active');
+            p1.style = `border: 1px solid ${color}`;
+        }
+        else {
+            p1.classList.remove('active');
+            p1.style = '';
+        }
+        if (p2.firstChild.textContent == name) {
+            p2.classList.add('active');
+            p2.style = `border: 1px solid ${color}`;
+        }
+        else {
+            p2.classList.remove('active');
+            p2.style = '';
+        }
     }
 
     function stopHighlight () {
         p1.classList.remove('active');
+        p1.style = '';
         p2.classList.remove('active');
+        p2.style = '';
     }
 
     function updateWinner (winner) {
@@ -113,20 +133,26 @@ let gameDisplay = (function () {
         else score.firstChild.textContent = '';
     }
 
+    function updateScore (string) {
+        score.lastChild.textContent = string;
+    }
+
     displayPlayers(one, two);
 
     return {
-        highlightPlayer, updateWinner, stopHighlight
+        highlightPlayer, updateWinner, stopHighlight, updateScore
     }
 })();
 
 let gameFlow = (function (){
 
     let count = 0;
-    let data
-    let color
-    let name
-    let winner
+    let data;
+    let color;
+    let name;
+    let winner;
+    let currentGame = 0;
+    let totalGames = [];
 
     function increaseCount () {
         count++;
@@ -134,13 +160,23 @@ let gameFlow = (function (){
 
     function setTurns (player1, player2) {
         increaseCount();
-        if (count%2 == 0) {
-            getPlayerData(player1);
+        if (currentGame%2 == 0) {
+            if (count%2 == 0) {
+                getPlayerData(player1);
+            }
+            else {
+                getPlayerData(player2);
+            }
         }
         else {
-            getPlayerData(player2);
+            if (count%2 == 0) {
+                getPlayerData(player2);
+            }
+            else {
+                getPlayerData(player1);
+            }
         }
-        gameDisplay.highlightPlayer(name);
+        gameDisplay.highlightPlayer(name, color);
     }
 
     function getPlayerData (player) {
@@ -153,18 +189,13 @@ let gameFlow = (function (){
         return data;
     }
 
-    
     function getColor () {
         return color;
     }
 
-    function logCount () {
-        console.log (count);
-    }
-
     function setFirstTurn (player1) {
         getPlayerData(player1);
-        gameDisplay.highlightPlayer(name);
+        gameDisplay.highlightPlayer(name, color);
         count = 0;
     }
 
@@ -197,18 +228,21 @@ let gameFlow = (function (){
     }
 
     function stopGame (cells) {
-        if (winner == one.getName() || winner == two.getName()) {
-            for (let i=0; i<cells.length; i++){
-                cells[i].disabled = true;
+        if (winner == one.getName() || winner == two.getName() || gameBoard.checkBoardIsFull()) {
+            if (winner == one.getName() || winner == two.getName()){
+                for (let i=0; i<cells.length; i++){
+                    cells[i].disabled = true;
+                }
+                totalGames[currentGame] = winner;
+                currentGame++;
+                checkMatchWinner ();
+            }
+            else {
+                winner = 'noWinner';                
             }
             gameDisplay.updateWinner(winner);
             gameDisplay.stopHighlight();
         }
-        else if (gameBoard.checkBoardIsFull()){
-            winner = 'noWinner';
-            gameDisplay.updateWinner(winner);
-            gameDisplay.stopHighlight();
-        } 
     }
 
     function checkLine (c1, c2, c3) {
@@ -221,15 +255,48 @@ let gameFlow = (function (){
     function restartGame() {
         count = 0;
         gameBoard.clearBoard();
+        if (currentGame%2 == 0) 
         setFirstTurn(one);
+        else
+        setFirstTurn (two)
         winner = null;
         gameDisplay.updateWinner(winner);
     }
 
+    function setMatch (num) {
+        for (let i = 0; i < num; i++)
+        totalGames[i] = '';
+        currentGame = 0;
+        gameDisplay.updateScore(`${one.getName()}: 0 ${two.getName()}: 0`);
+    }
+
+    function restartMatch () {
+        setMatch(totalGames.length);
+        buttons.activateRestartGame();
+        restartGame();
+    }
+
+    function checkMatchWinner () {
+        let p1Score = 0;
+        let p2Score = 0;
+        for (let i = 0; i<currentGame; i++){
+            if (one.getName() == totalGames[i]) p1Score++;
+            else p2Score++;
+        }
+        if (p1Score > totalGames.length/2 || p2Score > totalGames.length/2){
+            if (p1Score > p2Score) gameDisplay.updateScore(`${one.getName()} has won the match!`);
+            else gameDisplay.updateScore(`${two.getName()} has won the match!`);
+            gameBoard.disableBoard();
+            buttons.disableRestartGame();
+        }
+        else gameDisplay.updateScore(`${one.getName()}: ${p1Score} ${two.getName()}: ${p2Score}`); 
+    }
+
+    setMatch (5);
     setFirstTurn(one);
 
     return {
-        setTurns, getData, getColor, logCount, checkWinner, restartGame
+        setTurns, getData, getColor, checkWinner, restartGame, restartMatch
     }
 })();
 
@@ -238,6 +305,19 @@ let buttons = (function () {
     const reMatch = document.querySelector('#restart-match');
 
     reGame.addEventListener('click', gameFlow.restartGame);
+    reMatch.addEventListener('click', gameFlow.restartMatch);
+
+    function disableRestartGame() {
+        reGame.disabled = true;
+    }
+
+    function activateRestartGame() {
+        reGame.disabled = false;
+    }
+
+    return {
+        disableRestartGame, activateRestartGame
+    }
 })();
 
 
