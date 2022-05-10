@@ -1,7 +1,34 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    border: 1px solid black;
+}
+
 #board {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     grid-template-rows: repeat(3, 1fr);
     height: 400px;
     width: 400px;
+}
+
+#box {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    width: 400px;
+    height: 100px;
+}
+
+#score {
+    grid-column: 1/3;
+}
+
+.active {
+    border: 1px solid red;
+}
+
+.active p::after {
+    content: "'s Turn";
 }
