@@ -5,6 +5,49 @@
     border: 1px solid black;
 }
 
+
+body {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+form {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    width: fit-content;
+}
+
+form.active {
+    top: 0;
+    left: 0;
+    transition: ease-in 2s;
+    width: 10px;
+}
+
+form.active > * {
+    transform: scale(0);
+}
+
+form.active:hover > * {
+    transform: scale(1);
+}
+
+form.active:hover {
+    width: fit-content;
+}
+
+#game {
+    transform: scale(0);
+    transition: ease-in 0.2s;
+}
+
+#game.active {
+    transform: scale(1);
+}
+
 #board {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -25,7 +68,6 @@
     grid-column: 1/3;
 }
 
-
-.active p::after {
+#score .active p::after {
     content: "'s Turn";
 }

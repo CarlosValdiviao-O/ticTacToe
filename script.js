@@ -32,8 +32,7 @@ const player = (nam, dat, col) => {
 
 }
 
-let one = player('one', 'x', '#309797');
-let two = player('two', 'r', 'blue');
+let one, two
 
 let gameBoard = (function () {
 
@@ -95,6 +94,7 @@ let gameDisplay = (function () {
     let p1 = document.querySelector('#p1');
     let p2 = document.querySelector('#p2');
     let score = document.querySelector('#score');
+    let gameDiv = document.querySelector('#game')
 
     function displayPlayers (player1, player2) {
         p1.firstChild.textContent = player1.getName();
@@ -137,10 +137,12 @@ let gameDisplay = (function () {
         score.lastChild.textContent = string;
     }
 
-    displayPlayers(one, two);
+    function displayGame () {
+        gameDiv.classList.add('active');
+    }
 
     return {
-        highlightPlayer, updateWinner, stopHighlight, updateScore
+        highlightPlayer, updateWinner, stopHighlight, updateScore, displayGame, displayPlayers
     }
 })();
 
@@ -292,11 +294,8 @@ let gameFlow = (function (){
         else gameDisplay.updateScore(`${one.getName()}: ${p1Score} ${two.getName()}: ${p2Score}`); 
     }
 
-    setMatch (5);
-    setFirstTurn(one);
-
     return {
-        setTurns, getData, getColor, checkWinner, restartGame, restartMatch
+        setTurns, getData, getColor, checkWinner, restartGame, restartMatch, setFirstTurn, setMatch
     }
 })();
 
@@ -317,6 +316,35 @@ let buttons = (function () {
 
     return {
         disableRestartGame, activateRestartGame
+    }
+})();
+
+let settings = (function () {
+    const menu = document.querySelector('#settings');
+    const start = document.querySelector('#start button');
+    const edits = Array.from(document.querySelectorAll('#settings input:not([type=range])'));
+    const divs = Array.from(document.querySelectorAll('#settings div div'));
+
+    start.addEventListener('click', shrinkSettings)
+
+    function shrinkSettings() {
+        menu.classList.add('active');
+        gameDisplay.displayGame();
+        startGame();
+    }
+
+    function startGame () {
+        if (menu.checkValidity()) {
+            one = player(edits[0].value, edits[1].value, edits[2].value);
+            two = player(edits[3].value, edits[4].value, edits[5].value);
+            gameDisplay.displayPlayers(one, two)
+            gameFlow.setMatch (5);
+            gameFlow.setFirstTurn(one);
+        }
+    }
+
+    return {
+        shrinkSettings
     }
 })();
 
