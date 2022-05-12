@@ -1,8 +1,9 @@
-const player = (nam, dat, col) => {
+const player = (nam, dat, col, brai) => {
 
     let name = nam;
     let data = dat;
     let color = col;
+    let brain = brai;
 
     const setName = function (string) {
         name = string;
@@ -27,8 +28,12 @@ const player = (nam, dat, col) => {
     const getName = function () {
         return name;
     }
+
+    const getBrain = function () {
+        return brain;
+    }
  
-    return { setName, setData, setColor, getColor, getData, getName}
+    return { setName, setData, setColor, getColor, getData, getName, getBrain}
 
 }
 
@@ -65,6 +70,7 @@ let gameBoard = (function () {
         for (let i=0; i<cells.length; i++){
         cells[i].textContent = '';
         cells[i].disabled = false;
+        cells[i].dataset.name = null;
         }
     }
 
@@ -86,8 +92,14 @@ let gameBoard = (function () {
         }
     }
 
+    function enableBoard () {
+        for (let i=0; i<cells.length; i++) {
+            cells[i].disabled = false;
+        }
+    }
+
     return {
-        clearBoard, getCells, checkBoardIsFull, disableBoard
+        clearBoard, getCells, checkBoardIsFull, disableBoard, enableBoard
     }
 })();
 
@@ -113,7 +125,7 @@ let gameDisplay = (function () {
         }
         if (p2.childNodes[0].textContent == name) {
             p2.classList.add('active');
-            p2.style = `border: 1px solid ${color}`;
+            p2.style = `border: 1px solid ${color}`;                       
         }
         else {
             p2.classList.remove('active');
@@ -167,20 +179,25 @@ let gameFlow = (function (){
         if (currentGame%2 == 0) {
             if (count%2 == 0) {
                 getPlayerData(player1);
+                letComputerPlay(player1);
             }
             else {
                 getPlayerData(player2);
+                letComputerPlay(player2);
             }
         }
         else {
             if (count%2 == 0) {
                 getPlayerData(player2);
+                letComputerPlay(player2);
             }
             else {
                 getPlayerData(player1);
+                letComputerPlay(player1);
             }
         }
         gameDisplay.highlightPlayer(name, color);
+        
     }
 
     function getPlayerData (player) {
@@ -246,29 +263,49 @@ let gameFlow = (function (){
                 checkMatchWinner ();
             }
             else {
-                winner = 'noWinner';                
+                winner = 'noWinner';
+                computer.stopComputer();                
             }
             gameDisplay.updateWinner(winner);
             gameDisplay.stopHighlight();
+            
         }
     }
 
     function checkLine (c1, c2, c3) {
         if (c1.dataset.name == c2.dataset.name && c2.dataset.name == c3.dataset.name) {
-            if (c1.dataset.name == one.getName()) winner = one.getName(); 
-            if (c1.dataset.name == two.getName()) winner = two.getName();                        
+            if (c1.dataset.name == one.getName()){
+                winner = one.getName();
+                c1.style = 'background-color: black';  //turn this into an active class so it is easier to remove
+                c2.style = 'background-color: black';
+                c3.style = 'background-color: black';
+                computer.stopComputer();
+            }  
+            if (c1.dataset.name == two.getName()) {
+                winner = two.getName();
+                c1.style = 'background-color: black';
+                c2.style = 'background-color: black';
+                c3.style = 'background-color: black';
+                computer.stopComputer();
+            }                         
         }
     }
 
     function restartGame() {
         count = 0;
         gameBoard.clearBoard();
-        if (currentGame%2 == 0) 
-        setFirstTurn(one);
-        else
-        setFirstTurn (two)
+        if (currentGame%2 == 0) {
+            setFirstTurn(one);
+            letComputerPlay(one);
+        }
+        else{
+            setFirstTurn (two);
+            letComputerPlay(two);
+        }
+        
         winner = null;
         gameDisplay.updateWinner(winner);
+        computer.startComputer(); 
     }
 
     function setMatch (num) {
@@ -301,8 +338,28 @@ let gameFlow = (function (){
         else gameDisplay.updateScore(`${one.getName()}: ${p1Score} ${two.getName()}: ${p2Score}`); 
     }
 
+    function getWinner () {
+        return winner;
+    }
+
+    function letComputerPlay (player) {
+        if (player.getBrain() == 'ai'){
+            gameBoard.disableBoard();
+            setTimeout( () => {
+                let run = computer.play(player);
+                if (run) {
+                    setTurns(one, two); 
+                    gameBoard.enableBoard();
+                    if (getWinner != '') checkWinner();
+                }
+                }, 500);      
+        }
+    }
+
     return {
-        setTurns, getData, getColor, getPlayer, checkWinner, restartGame, restartMatch, setFirstTurn, setMatch
+        setTurns, getData, getColor, getPlayer, checkWinner,
+        restartGame, restartMatch, setFirstTurn, setMatch,
+        getWinner
     }
 })();
 
@@ -364,11 +421,12 @@ let settings = (function () {
     }
 
     function startGame () {
-        one = player(inputs[0].value, inputs[1].value, inputs[2].value);
-        two = player(inputs[3].value, inputs[4].value, inputs[5].value);
+        one = player(inputs[0].value, inputs[1].value, inputs[2].value, 'ai'); //*
+        two = player(inputs[3].value, inputs[4].value, inputs[5].value, 'ai'); //*
+        computer.startComputer();
         gameDisplay.displayPlayers(one, two)
         gameFlow.setMatch(slider.value);
-        gameFlow.setFirstTurn(one);
+        gameFlow.restartGame();
     }
 
     function checkFormValidity () {
@@ -420,7 +478,6 @@ let settings = (function () {
     }
 
     function newMatch () {
-        gameFlow.restartGame();
         disableInputs();
         hideConfirm();
         startGame();
@@ -439,6 +496,67 @@ let settings = (function () {
 
     return {
         shrinkSettings
+    }
+})();
+
+let computer = (function () {
+
+    let pick
+    let computerOn = false;
+    let data
+    let name
+    let color
+
+    function play (player) {
+        if (computerOn){
+            getPlayerData(player);
+            pickRandom();
+        } 
+        else 
+        return false;
+        return true; 
+    }
+
+    function getPlayerData (player) {
+        data = player.getData();
+        color = player.getColor();
+        name = player.getName();
+    }
+
+    function pickRandom () {
+        let available = false;
+        let cells = gameBoard.getCells();
+        for (let i = 0; i<cells.length; i++) {
+            if (cells[i].textContent == '') {
+                available = true;
+                break;
+            }
+        }
+        if (available == true) {
+            fillCell(cells);                     
+        }
+    }
+
+    function fillCell (cells) {      
+        pick = cells[Math.floor(Math.random()*9)];
+        if (pick.textContent == '' ) {
+            pick.style.color = color;
+            pick.textContent = data;
+            pick.dataset.name = name;
+        }
+        else pickRandom();
+    }
+
+    function stopComputer () {
+        computerOn = false;
+    }
+
+    function startComputer() {
+        computerOn = true;
+    }
+
+    return {
+        play, stopComputer, startComputer
     }
 })();
 
