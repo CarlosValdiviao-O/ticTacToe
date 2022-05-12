@@ -10,37 +10,41 @@
 </head>
 <body>
     <form id="settings">
+        <img src="grid.svg" alt="grid-icon" id="icon">
         <div id="p1-settings">
             <div class="name">
-                <input type="text" value="Player One" minlength="1">
-                <button type="button"></button>
+                <input type="text" value="Player One" minlength="1" required>
+                <p class="instructions">*Please enter a player name</p>
             </div>
             <div class="character">
-                <input type="text" value="X" minlength="1" maxlength="1">
-                <button type="button"></button>
+                <input type="text" value="X" minlength="1" maxlength="1" required>
+                <p class="instructions">*Please enter a symbol or character</p>
             </div>
             <div class="color">
                 <input type="color" value="#ff0000">
-                <button type="button"></button>
+                <p class="instructions"></p>
             </div>
         </div>
         <div id="p2-settings">
             <div class="name">
-                <input type="text" value="Player Two" minlength="1">
-                <button type="button"></button>
+                <input type="text" value="Player Two" minlength="1" required>
+                <p class="instructions">*Please enter a player name</p>
             </div>
             <div class="character">
-                <input type="text" value="O" minlength="1" maxlength="1">
-                <button type="button"></button></div>
+                <input type="text" value="O" minlength="1" maxlength="1" required>
+                <p class="instructions">*Please enter a symbol or character</p>
+            </div>
             <div class="color">
                 <input type="color" value="#0000ff">
-                <button type="button"></button>
+                <p class="instructions"></p>
             </div>
         </div>
-        <div id="start">
+        <div id="setup">
             <input type="range" value="5" min="1" max="9" step="2">
             <p>Number of Matches: 5</p>
-            <button type="button">Ready?</button>
+            <button type="button" id="start">Ready?</button>
+            <button type="button" id="edit">Edit</button>
+            <p class="instructions"></p>
         </div>
     </form>
     <div id="game">
@@ -66,6 +70,14 @@
         <div id="buttons">
             <button id="restart-game">Restart Game</button>
             <button id="restart-match">Restart Match</button>
+        </div>
+    </div>
+    <div id="background"></div> 
+    <div id="confirmation">
+        <div id="message">
+            <p>In order for the changes to take effect the match will be restarted. Do you want to continue?</p>
+            <button id="confirm">Confirm</button>
+            <button id="cancel">Cancel</button>
         </div>
     </div>
 </body>

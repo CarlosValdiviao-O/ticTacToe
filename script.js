@@ -41,7 +41,7 @@ let gameBoard = (function () {
     function clickOnCell(index, data) {
         if (cells[index].textContent == ''){
             cells[index].textContent = data;
-            changeColor(index, gameFlow.getColor());
+            changeColor(index, gameFlow.getColor(), gameFlow.getPlayer());
             gameFlow.setTurns(one, two);
         }  
     }
@@ -56,8 +56,9 @@ let gameBoard = (function () {
         gameFlow.checkWinner();
     } 
 
-    function changeColor (index, data) {
-        cells[index].style = `color: ${data}`;
+    function changeColor (index, data, name) {
+        cells[index].style.color = data;
+        cells[index].dataset.name = name;
     }
 
     function clearBoard() {
@@ -94,15 +95,15 @@ let gameDisplay = (function () {
     let p1 = document.querySelector('#p1');
     let p2 = document.querySelector('#p2');
     let score = document.querySelector('#score');
-    let gameDiv = document.querySelector('#game')
+    let gameDiv = document.querySelector('#game');
 
     function displayPlayers (player1, player2) {
-        p1.firstChild.textContent = player1.getName();
-        p2.firstChild.textContent = player2.getName();
+        p1.childNodes[0].textContent = player1.getName();
+        p2.childNodes[0].textContent = player2.getName();
     }
 
     function highlightPlayer (name, color) {
-        if (p1.firstChild.textContent == name) {
+        if (p1.childNodes[0].textContent == name) {
             p1.classList.add('active');
             p1.style = `border: 1px solid ${color}`;
         }
@@ -110,7 +111,7 @@ let gameDisplay = (function () {
             p1.classList.remove('active');
             p1.style = '';
         }
-        if (p2.firstChild.textContent == name) {
+        if (p2.childNodes[0].textContent == name) {
             p2.classList.add('active');
             p2.style = `border: 1px solid ${color}`;
         }
@@ -128,17 +129,18 @@ let gameDisplay = (function () {
     }
 
     function updateWinner (winner) {
-        if (winner != null && winner != 'noWinner') score.firstChild.textContent =`The winner is ${winner}`;
-        else if (winner == 'noWinner') score.firstChild.textContent = `It's a tie. There is no winner`;
-        else score.firstChild.textContent = '';
+        if (winner != null && winner != 'noWinner') score.childNodes[0].textContent =`The winner is ${winner}`;
+        else if (winner == 'noWinner') score.childNodes[0].textContent = `It's a tie. There is no winner`;
+        else score.childNodes[0].textContent = '';
     }
 
     function updateScore (string) {
-        score.lastChild.textContent = string;
+        score.childNodes[1].textContent = string;
     }
 
     function displayGame () {
         gameDiv.classList.add('active');
+        gameBoard.clearBoard();
     }
 
     return {
@@ -195,6 +197,10 @@ let gameFlow = (function (){
         return color;
     }
 
+    function getPlayer () {
+        return name
+    }
+
     function setFirstTurn (player1) {
         getPlayerData(player1);
         gameDisplay.highlightPlayer(name, color);
@@ -248,9 +254,9 @@ let gameFlow = (function (){
     }
 
     function checkLine (c1, c2, c3) {
-        if (c1.textContent == c2.textContent && c2.textContent == c3.textContent) {
-            if (c1.textContent == one.getData()) winner = one.getName(); 
-            if (c1.textContent == two.getData()) winner = two.getName();            
+        if (c1.dataset.name == c2.dataset.name && c2.dataset.name == c3.dataset.name) {
+            if (c1.dataset.name == one.getName()) winner = one.getName(); 
+            if (c1.dataset.name == two.getName()) winner = two.getName();                        
         }
     }
 
@@ -266,6 +272,8 @@ let gameFlow = (function (){
     }
 
     function setMatch (num) {
+        totalGames = [];
+        buttons.activateRestartGame();
         for (let i = 0; i < num; i++)
         totalGames[i] = '';
         currentGame = 0;
@@ -274,7 +282,6 @@ let gameFlow = (function (){
 
     function restartMatch () {
         setMatch(totalGames.length);
-        buttons.activateRestartGame();
         restartGame();
     }
 
@@ -295,7 +302,7 @@ let gameFlow = (function (){
     }
 
     return {
-        setTurns, getData, getColor, checkWinner, restartGame, restartMatch, setFirstTurn, setMatch
+        setTurns, getData, getColor, getPlayer, checkWinner, restartGame, restartMatch, setFirstTurn, setMatch
     }
 })();
 
@@ -321,26 +328,113 @@ let buttons = (function () {
 
 let settings = (function () {
     const menu = document.querySelector('#settings');
-    const start = document.querySelector('#start button');
-    const edits = Array.from(document.querySelectorAll('#settings input:not([type=range])'));
-    const divs = Array.from(document.querySelectorAll('#settings div div'));
+    const start = document.querySelector('#start');
+    const inputs = Array.from(document.querySelectorAll('#settings input'));
+    const instructions = Array.from(document.getElementsByClassName('instructions'));
+    const slider = document.querySelector('input[type=range]');
+    const matches = document.querySelector('#setup p');
+    const edit = document.querySelector('#edit');
+    const confirmation = document.querySelector('#confirmation');
+    const background = document.querySelector('#background');
+    const confirm = document.querySelector('#confirm');
+    const cancel = document.querySelector('#cancel');
 
-    start.addEventListener('click', shrinkSettings)
+    start.addEventListener('click', shrinkSettings);
+    slider.addEventListener('input', updateMatches);
+    edit.addEventListener('click', enableEdit);
+    confirm.addEventListener('click', newMatch);
+
+    cancel.addEventListener('click', cancelSettings);
+    background.addEventListener('click', cancelSettings);
+
+    let previousSettings = [];
+
+    for(let i = 0; i < inputs.length; i++) {
+        inputs[i].addEventListener('input', () => checkInputValidity(i));
+    }
 
     function shrinkSettings() {
-        menu.classList.add('active');
-        gameDisplay.displayGame();
-        startGame();
+        if (menu.checkValidity()) {
+            menu.classList.add('side');
+            disableInputs();
+            gameDisplay.displayGame();
+            startGame();
+        }
+        else checkFormValidity();
     }
 
     function startGame () {
-        if (menu.checkValidity()) {
-            one = player(edits[0].value, edits[1].value, edits[2].value);
-            two = player(edits[3].value, edits[4].value, edits[5].value);
-            gameDisplay.displayPlayers(one, two)
-            gameFlow.setMatch (5);
-            gameFlow.setFirstTurn(one);
+        one = player(inputs[0].value, inputs[1].value, inputs[2].value);
+        two = player(inputs[3].value, inputs[4].value, inputs[5].value);
+        gameDisplay.displayPlayers(one, two)
+        gameFlow.setMatch(slider.value);
+        gameFlow.setFirstTurn(one);
+    }
+
+    function checkFormValidity () {
+        for (let i = 0; i < inputs.length; i++) checkInputValidity (i);
+    }
+
+    function checkInputValidity (i) {   
+        if (!inputs[i].validity.valid) instructions[i].classList.add('active');
+        else instructions[i].classList.remove('active');
+    }
+
+    function updateMatches () {
+        matches.textContent = `Number of Matches: ${slider.value}`;
+    }
+
+    function disableInputs () {
+        for(let i=0; i<inputs.length; i++) inputs[i].disabled = true;
+    }
+
+    function enableInputs () {
+        for(let i=0; i<inputs.length; i++) inputs[i].disabled = false;
+    }
+
+    function enableEdit() {
+        if (edit.textContent == 'Edit') {
+            for (let i = 0; i<inputs.length; i++) previousSettings[i] = inputs[i].value;
+            enableInputs();
+            edit.textContent = 'Confirm';
         }
+        else if (menu.checkValidity()) {
+            let inputsChanged = false;
+            for (let i=0; i<inputs.length; i++) {
+                if (previousSettings[i] != inputs[i].value){
+                    inputsChanged = true;
+                    break;
+                }
+            }
+            if (inputsChanged == true) {
+                displayConfirm();
+            }
+            disableInputs();
+            edit.textContent = 'Edit';
+        }
+    }
+
+    function displayConfirm () {
+        confirmation.classList.add('active');
+        background.classList.add('active');
+    }
+
+    function newMatch () {
+        gameFlow.restartGame();
+        disableInputs();
+        hideConfirm();
+        startGame();
+    }
+
+    function hideConfirm () {
+        confirmation.classList.remove('active');
+        background.classList.remove('active');
+    }
+
+    function cancelSettings () {
+        hideConfirm();
+        for (let i=0; i<previousSettings.length; i++) inputs[i].value = previousSettings[i];
+        updateMatches();
     }
 
     return {
