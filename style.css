@@ -120,3 +120,27 @@ form.side:hover #start {
 #message {
     background-color: white;
 }
+
+#circles {
+    position: absolute;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    height: 400px;
+    width: 400px;
+    transform: scale(0);
+}
+
+#circles.active {
+    transform: scale(1);
+}
+
+.circle {
+    border-radius: 50%;
+    margin: 10%;
+    border: 0px;
+}
+
+.circle.active {
+    border: 5px solid red;
+}

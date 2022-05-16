@@ -24,6 +24,19 @@
                 <input type="color" value="#ff0000">
                 <p class="instructions"></p>
             </div>
+            <div class="brain">
+                <select name="brain1" id="brain1">
+                    <option value="human">Human</option>
+                    <option value="ai">Bot</option>
+                </select>
+            </div>
+            <div class="level">
+                <select name="level1" id="level1">
+                    <option value="easy">Easy</option>
+                    <option value="medium">Medium</option>
+                    <option value="hard">Hard</option>
+                </select>
+            </div>
         </div>
         <div id="p2-settings">
             <div class="name">
@@ -38,6 +51,19 @@
                 <input type="color" value="#0000ff">
                 <p class="instructions"></p>
             </div>
+            <div class="brain">
+                <select name="brain2" id="brain2">
+                    <option value="human">Human</option>
+                    <option value="ai">Bot</option>
+                </select>
+            </div>
+            <div class="level">
+                <select name="level2" id="level2">
+                    <option value="easy">Easy</option>
+                    <option value="medium">Medium</option>
+                    <option value="hard">Hard</option>
+                </select>
+            </div>
         </div>
         <div id="setup">
             <input type="range" value="5" min="1" max="9" step="2">
@@ -49,6 +75,8 @@
     </form>
     <div id="game">
         <div id="board">
+            <button class="cell"></button>            
+            <button class="cell"></button>            
             <button class="cell"></button>
             <button class="cell"></button>
             <button class="cell"></button>
@@ -56,8 +84,17 @@
             <button class="cell"></button>
             <button class="cell"></button>
             <button class="cell"></button>
-            <button class="cell"></button>
-            <button class="cell"></button>
+            <div id="circles">
+                <div class="circle"></div>
+                <div class="circle"></div>
+                <div class="circle"></div>
+                <div class="circle"></div>
+                <div class="circle"></div>
+                <div class="circle"></div>
+                <div class="circle"></div>
+                <div class="circle"></div>
+                <div class="circle"></div>
+            </div>
         </div> 
         <div id="box">
             <div id="p1"><p></p></div>

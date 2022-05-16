@@ -1,9 +1,10 @@
-const player = (nam, dat, col, brai) => {
+const player = (nam, dat, col, brai, lvl) => {
 
     let name = nam;
     let data = dat;
     let color = col;
     let brain = brai;
+    let level = lvl;
 
     const setName = function (string) {
         name = string;
@@ -15,6 +16,14 @@ const player = (nam, dat, col, brai) => {
 
     const setColor = function (string) {
         color = string;
+    }
+
+    const setBrain = function (string) {
+        brain = string;
+    }
+
+    const setLevel = function (string) {
+        level = string;
     }
 
     const getColor = function () {
@@ -32,8 +41,15 @@ const player = (nam, dat, col, brai) => {
     const getBrain = function () {
         return brain;
     }
+
+    const getLevel = function () {
+        return level;
+    }
  
-    return { setName, setData, setColor, getColor, getData, getName, getBrain}
+    return { 
+        setName, setData, setColor, setBrain, setLevel,
+        getColor, getData, getName, getBrain, getLevel
+    }
 
 }
 
@@ -42,6 +58,8 @@ let one, two
 let gameBoard = (function () {
 
     let cells = Array.from(document.getElementsByClassName('cell'));
+    let circles = Array.from(document.getElementsByClassName('circle'));
+    let circleGrid = document.querySelector('#circles')
 
     function clickOnCell(index, data) {
         if (cells[index].textContent == ''){
@@ -71,11 +89,20 @@ let gameBoard = (function () {
         cells[i].textContent = '';
         cells[i].disabled = false;
         cells[i].dataset.name = null;
+        circles[i].classList.remove('active');
         }
+        circleGrid.classList.remove('active');
+    }
+
+    function activateCircles() {
+        circleGrid.classList.add('active');
     }
 
     function getCells () {
         return cells;
+    }
+    function getCircles () {
+        return circles;
     }
 
     function checkBoardIsFull () {
@@ -99,7 +126,8 @@ let gameBoard = (function () {
     }
 
     return {
-        clearBoard, getCells, checkBoardIsFull, disableBoard, enableBoard
+        clearBoard, getCells, getCircles, checkBoardIsFull,
+        disableBoard, enableBoard, activateCircles
     }
 })();
 
@@ -179,21 +207,21 @@ let gameFlow = (function (){
         if (currentGame%2 == 0) {
             if (count%2 == 0) {
                 getPlayerData(player1);
-                letComputerPlay(player1);
+                letComputerPlay(player1, player2);
             }
             else {
                 getPlayerData(player2);
-                letComputerPlay(player2);
+                letComputerPlay(player2, player1);
             }
         }
         else {
             if (count%2 == 0) {
                 getPlayerData(player2);
-                letComputerPlay(player2);
+                letComputerPlay(player2, player1);
             }
             else {
                 getPlayerData(player1);
-                letComputerPlay(player1);
+                letComputerPlay(player1, player2);
             }
         }
         gameDisplay.highlightPlayer(name, color);
@@ -236,20 +264,20 @@ let gameFlow = (function (){
 
     function checkRows (cells) {
         for (let i = 0; i<9; i++) {
-            checkLine(cells[i], cells[i+1], cells[i+2]);
+            checkLine(i, i+1, i+2, cells);
             i+=2;
         }
     }
 
     function checkColums (cells) {
         for (let i = 0; i<3; i++) {
-            checkLine(cells[i], cells[i+3], cells[i+6]);
+            checkLine(i, i+3, i+6, cells);
         }
     }
 
     function checkCross(cells) {
-        checkLine(cells[0], cells[4], cells[8]);
-        checkLine(cells[2], cells[4], cells[6]);
+        checkLine(0, 4, 8, cells);
+        checkLine(2, 4, 6, cells);
     }
 
     function stopGame (cells) {
@@ -272,20 +300,23 @@ let gameFlow = (function (){
         }
     }
 
-    function checkLine (c1, c2, c3) {
-        if (c1.dataset.name == c2.dataset.name && c2.dataset.name == c3.dataset.name) {
-            if (c1.dataset.name == one.getName()){
+    function checkLine (i1, i2, i3, cells) {
+        let circles = gameBoard.getCircles();
+        if (cells[i1].dataset.name == cells[i2].dataset.name && cells[i2].dataset.name == cells[i3].dataset.name) {
+            if (cells[i1].dataset.name == one.getName()){
                 winner = one.getName();
-                c1.style = 'background-color: black';  //turn this into an active class so it is easier to remove
-                c2.style = 'background-color: black';
-                c3.style = 'background-color: black';
+                circles[i1].classList.add('active');
+                circles[i2].classList.add('active');
+                circles[i3].classList.add('active');
+                gameBoard.activateCircles();
                 computer.stopComputer();
             }  
-            if (c1.dataset.name == two.getName()) {
+            if (cells[i1].dataset.name == two.getName()) {
                 winner = two.getName();
-                c1.style = 'background-color: black';
-                c2.style = 'background-color: black';
-                c3.style = 'background-color: black';
+                circles[i1].classList.add('active');
+                circles[i2].classList.add('active');
+                circles[i3].classList.add('active');
+                gameBoard.activateCircles();
                 computer.stopComputer();
             }                         
         }
@@ -296,11 +327,11 @@ let gameFlow = (function (){
         gameBoard.clearBoard();
         if (currentGame%2 == 0) {
             setFirstTurn(one);
-            letComputerPlay(one);
+            letComputerPlay(one, two);
         }
         else{
             setFirstTurn (two);
-            letComputerPlay(two);
+            letComputerPlay(two, one);
         }
         
         winner = null;
@@ -342,11 +373,11 @@ let gameFlow = (function (){
         return winner;
     }
 
-    function letComputerPlay (player) {
+    function letComputerPlay (player, player2) {
         if (player.getBrain() == 'ai'){
             gameBoard.disableBoard();
             setTimeout( () => {
-                let run = computer.play(player);
+                let run = computer.play(player, player2);
                 if (run) {
                     setTurns(one, two); 
                     gameBoard.enableBoard();
@@ -387,6 +418,7 @@ let settings = (function () {
     const menu = document.querySelector('#settings');
     const start = document.querySelector('#start');
     const inputs = Array.from(document.querySelectorAll('#settings input'));
+    const selects = Array.from(document.querySelectorAll('select'));
     const instructions = Array.from(document.getElementsByClassName('instructions'));
     const slider = document.querySelector('input[type=range]');
     const matches = document.querySelector('#setup p');
@@ -421,8 +453,8 @@ let settings = (function () {
     }
 
     function startGame () {
-        one = player(inputs[0].value, inputs[1].value, inputs[2].value, 'ai'); //*
-        two = player(inputs[3].value, inputs[4].value, inputs[5].value, 'ai'); //*
+        one = player(inputs[0].value, inputs[1].value, inputs[2].value, selects[0].value, selects[1].value);
+        two = player(inputs[3].value, inputs[4].value, inputs[5].value, selects[2].value, selects[3].value); 
         computer.startComputer();
         gameDisplay.displayPlayers(one, two)
         gameFlow.setMatch(slider.value);
@@ -444,15 +476,18 @@ let settings = (function () {
 
     function disableInputs () {
         for(let i=0; i<inputs.length; i++) inputs[i].disabled = true;
+        for (let i = 0; i <selects.length; i++) selects[i].disabled = true;
     }
 
     function enableInputs () {
         for(let i=0; i<inputs.length; i++) inputs[i].disabled = false;
+        for (let i = 0; i <selects.length; i++) selects[i].disabled = false;
     }
 
     function enableEdit() {
         if (edit.textContent == 'Edit') {
             for (let i = 0; i<inputs.length; i++) previousSettings[i] = inputs[i].value;
+            for (let i = 0; i <selects.length; i++) previousSettings[i+selects.length] = selects[i].value;
             enableInputs();
             edit.textContent = 'Confirm';
         }
@@ -460,6 +495,12 @@ let settings = (function () {
             let inputsChanged = false;
             for (let i=0; i<inputs.length; i++) {
                 if (previousSettings[i] != inputs[i].value){
+                    inputsChanged = true;
+                    break;
+                }
+            }
+            for (let i=0; i<selects.length; i++) {
+                if (previousSettings[i+selects.length] != selects[i].value){
                     inputsChanged = true;
                     break;
                 }
@@ -491,6 +532,7 @@ let settings = (function () {
     function cancelSettings () {
         hideConfirm();
         for (let i=0; i<previousSettings.length; i++) inputs[i].value = previousSettings[i];
+        for (let i=0; i<selects.length; i++) selects[i].value = previousSettings[i+selects.length];
         updateMatches();
     }
 
@@ -503,27 +545,23 @@ let computer = (function () {
 
     let pick
     let computerOn = false;
-    let data
-    let name
-    let color
+    let scores = [];
+    let winner = '';
 
-    function play (player) {
+    function play (player, player2) {
         if (computerOn){
-            getPlayerData(player);
-            pickRandom();
+            setScores(player);
+            if (player.getLevel() == 'easy')
+            pickRandom(player);
+            else
+            intelligentMove(player, player2);    
+            return true;
         } 
         else 
-        return false;
-        return true; 
+        return false;  
     }
 
-    function getPlayerData (player) {
-        data = player.getData();
-        color = player.getColor();
-        name = player.getName();
-    }
-
-    function pickRandom () {
+    function pickRandom (player) {
         let available = false;
         let cells = gameBoard.getCells();
         for (let i = 0; i<cells.length; i++) {
@@ -533,18 +571,24 @@ let computer = (function () {
             }
         }
         if (available == true) {
-            fillCell(cells);                     
+            pick = cells[Math.floor(Math.random()*9)];
+            if (pick.textContent == '')
+            fillCell(pick, player); 
+            else pickRandom(player);      
+        }    
+    }
+
+    function fillCell (pick, player) {      
+        if (pick.textContent == '' ) {
+            pick.style.color = player.getColor();
+            pick.textContent = player.getData();
+            pick.dataset.name = player.getName();
         }
     }
 
-    function fillCell (cells) {      
-        pick = cells[Math.floor(Math.random()*9)];
-        if (pick.textContent == '' ) {
-            pick.style.color = color;
-            pick.textContent = data;
-            pick.dataset.name = name;
-        }
-        else pickRandom();
+    function undo (pick) {      
+            pick[0] = '';
+            pick[1] = null;
     }
 
     function stopComputer () {
@@ -555,10 +599,158 @@ let computer = (function () {
         computerOn = true;
     }
 
+    function intelligentMove(player, player2) {
+        let cells = gameBoard.getCells();
+        let bestScore = -Infinity;
+        let best;
+        let secondBest;
+        let fakeBoard = createFakeBoard(cells);
+        for (let i = 0; i<fakeBoard.length; i++) {
+            if (fakeBoard[i][0] == '') {
+                fillFakeCell(fakeBoard[i], player);
+                let score = minimax(fakeBoard, false, player, player2);
+                undo(fakeBoard[i]);
+                if (score == 0){ 
+                    secondBest = i;    
+                }
+                if (score > bestScore) {
+                    bestScore = score;
+                    best = i;
+                }
+            }
+        } 
+        if (player.getLevel() == 'hard') 
+        fillCell(cells[best], player);
+        else {
+            if (secondBest == undefined) pickRandom(player);
+            else
+            fillCell(cells[secondBest], player);
+        } 
+        
+    }
+
+    function createFakeBoard (cells) {
+        let fakeBoard = [];
+        for (let i = 0; i<cells.length; i++) {
+            fakeBoard[i] = [];
+            fakeBoard[i][0] = cells[i].textContent;
+            fakeBoard[i][1] = cells[i].dataset.name;  
+        }
+        return fakeBoard;
+    }
+
+    function minimax (fakeBoard, isMaximizing, player, player2) {
+        checkWinner(fakeBoard);
+        if (winner == '') {}
+        else {
+            let score = scores[scores.indexOf(winner)+1];
+            winner = '';
+            return score;
+        }
+
+        if (isMaximizing){
+            let topScore = -Infinity;
+            for (let i = 0; i<fakeBoard.length; i++) {
+                if (fakeBoard[i][0] == '') {
+                    fillFakeCell(fakeBoard[i], player);
+                    let score = minimax(fakeBoard, false, player, player2);
+                    undo(fakeBoard[i]);
+                    if (score > topScore)
+                    topScore = score;
+                }
+            }
+            return topScore;
+        }
+        else{
+            let topScore = Infinity;
+            for (let i = 0; i<fakeBoard.length; i++) {
+                if (fakeBoard[i][0] == '') {
+                    fillFakeCell(fakeBoard[i], player2);
+                    let score = minimax(fakeBoard, true, player, player2);
+                    undo(fakeBoard[i]);
+                    if (score < topScore)
+                    topScore = score;
+                }
+            }
+            return topScore;
+        }
+    }
+
+    function fillFakeCell (pick, player) {
+        pick[0] = player.getData();
+        pick[1] = player.getName();
+    }
+
+    function setScores (player) {
+        scores[0] = one.getName();
+        scores[1] = 1;    
+        scores[2] = two.getName();
+        scores[3] = -1;
+        scores[4] = 'noWinner';
+        scores[5] = 0;
+        if (player.getName() == two.getName()) {
+            scores[1] = -1;
+            scores[3] = 1;
+        }
+    } 
+
+    function checkWinner (cells) {
+        if (winner == '') {
+            checkRows(cells);
+            checkColums(cells);
+            checkCross(cells); 
+            isFull(cells);
+        } 
+    }
+
+    function checkRows (cells) {
+        for (let i = 0; i<9; i++) {
+            checkLine(i, i+1, i+2, cells);
+            i+=2;
+        }
+    }
+
+    function checkColums (cells) {
+        for (let i = 0; i<3; i++) {
+            checkLine(i, i+3, i+6, cells);
+        }
+    }
+
+    function checkCross(cells) {
+        checkLine(0, 4, 8, cells);
+        checkLine(2, 4, 6, cells);
+    }
+
+    function isFull (cells) {
+        let available = false;
+        for (let i = 0; i<cells.length; i++) {
+            if (cells[i][0] == '') {
+                available = true;
+                break;
+            }
+        }
+        if (available != true && winner == '') {
+            winner = 'noWinner';
+        }
+    }
+
+    function checkLine (i1, i2, i3, cells) {
+        if (cells[i1][1] == cells[i2][1] && cells[i2][1] == cells[i3][1]) {
+            if (cells[i1][1] == one.getName() && winner == ''){
+                winner = one.getName();
+            }  
+            if (cells[i1][1] == two.getName() && winner == '') {
+                winner = two.getName();
+            }                     
+        }
+    }
+
     return {
-        play, stopComputer, startComputer
+        play, stopComputer, startComputer, checkWinner
     }
 })();
+
+//change checkwinner 
 
 
 
