@@ -427,11 +427,16 @@ let settings = (function () {
     const background = document.querySelector('#background');
     const confirm = document.querySelector('#confirm');
     const cancel = document.querySelector('#cancel');
+    const level = Array.from(document.getElementsByClassName('level'));
 
     start.addEventListener('click', shrinkSettings);
     slider.addEventListener('input', updateMatches);
     edit.addEventListener('click', enableEdit);
     confirm.addEventListener('click', newMatch);
+    selects[0].addEventListener('change', displayDifficulty);
+    selects[2].addEventListener('change', displayDifficulty);
+    inputs[0].addEventListener('input', checkSameNames);
+    inputs[3].addEventListener('input', checkSameNames);
 
     cancel.addEventListener('click', cancelSettings);
     background.addEventListener('click', cancelSettings);
@@ -443,6 +448,7 @@ let settings = (function () {
     }
 
     function shrinkSettings() {
+        if (checkSameNames()) return;
         if (menu.checkValidity()) {
             menu.classList.add('side');
             disableInputs();
@@ -463,6 +469,7 @@ let settings = (function () {
 
     function checkFormValidity () {
         for (let i = 0; i < inputs.length; i++) checkInputValidity (i);
+        
     }
 
     function checkInputValidity (i) {   
@@ -470,24 +477,49 @@ let settings = (function () {
         else instructions[i].classList.remove('active');
     }
 
+    function checkSameNames() {
+        if (inputs[0].value == inputs[3].value) {
+            instructions[6].classList.add('active');
+            return true;
+        }
+        else {
+            instructions[6].classList.remove('active');
+            return false;
+        }
+    }
+
     function updateMatches () {
         matches.textContent = `Number of Matches: ${slider.value}`;
     }
 
     function disableInputs () {
-        for(let i=0; i<inputs.length; i++) inputs[i].disabled = true;
-        for (let i = 0; i <selects.length; i++) selects[i].disabled = true;
+        for(let i=0; i<inputs.length; i++){
+            inputs[i].disabled = true;
+            inputs[i].style.cursor = 'default';
+        }
+        for (let i = 0; i <selects.length; i++) {
+            selects[i].disabled = true;
+            selects[i].style.cursor = 'default';
+        }
     }
 
     function enableInputs () {
-        for(let i=0; i<inputs.length; i++) inputs[i].disabled = false;
-        for (let i = 0; i <selects.length; i++) selects[i].disabled = false;
+        for(let i=0; i<inputs.length; i++) {
+            inputs[i].disabled = false;
+            inputs[i].style.cursor = 'auto';
+            if (i == 2 || i == 5 || i == 6)
+            inputs[i].style.cursor = 'pointer';
+        }
+        for (let i = 0; i <selects.length; i++) {
+            selects[i].disabled = false;
+            selects[i].style.cursor = 'pointer';
+        }
     }
 
     function enableEdit() {
         if (edit.textContent == 'Edit') {
             for (let i = 0; i<inputs.length; i++) previousSettings[i] = inputs[i].value;
-            for (let i = 0; i <selects.length; i++) previousSettings[i+selects.length] = selects[i].value;
+            for (let i = 0; i <selects.length; i++) previousSettings[i+inputs.length] = selects[i].value;
             enableInputs();
             edit.textContent = 'Confirm';
         }
@@ -500,7 +532,7 @@ let settings = (function () {
                 }
             }
             for (let i=0; i<selects.length; i++) {
-                if (previousSettings[i+selects.length] != selects[i].value){
+                if (previousSettings[i+inputs.length] != selects[i].value){
                     inputsChanged = true;
                     break;
                 }
@@ -534,6 +566,13 @@ let settings = (function () {
         for (let i=0; i<previousSettings.length; i++) inputs[i].value = previousSettings[i];
         for (let i=0; i<selects.length; i++) selects[i].value = previousSettings[i+selects.length];
         updateMatches();
+    }
+
+    function displayDifficulty () {
+        if (selects[0].value == 'human') level[0].classList.remove('active')
+        else level[0].classList.add('active');
+        if (selects[2].value == 'human') level[1].classList.remove('active')
+        else level[1].classList.add('active');    
     }
 
     return {

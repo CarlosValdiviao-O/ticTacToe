@@ -7,13 +7,17 @@
     <title>Tic Tac Toe</title>
     <link rel="stylesheet" href="style.css">
     <script src="script.js" defer></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500&display=swap" rel="stylesheet">
 </head>
 <body>
     <form id="settings">
         <img src="grid.svg" alt="grid-icon" id="icon">
+        <legend>Tic Tac Toe!</legend>
         <div id="p1-settings">
             <div class="name">
-                <input type="text" value="Player One" minlength="1" required>
+                <input type="text" value="Player One" minlength="1" maxlength="12" required>
                 <p class="instructions">*Please enter a player name</p>
             </div>
             <div class="character">
@@ -21,7 +25,7 @@
                 <p class="instructions">*Please enter a symbol or character</p>
             </div>
             <div class="color">
-                <input type="color" value="#ff0000">
+                <input type="color" value="#ffffff">
                 <p class="instructions"></p>
             </div>
             <div class="brain">
@@ -40,7 +44,7 @@
         </div>
         <div id="p2-settings">
             <div class="name">
-                <input type="text" value="Player Two" minlength="1" required>
+                <input type="text" value="Player Two" minlength="1" maxlength="12" required>
                 <p class="instructions">*Please enter a player name</p>
             </div>
             <div class="character">
@@ -48,7 +52,7 @@
                 <p class="instructions">*Please enter a symbol or character</p>
             </div>
             <div class="color">
-                <input type="color" value="#0000ff">
+                <input type="color" value="#ffffff">
                 <p class="instructions"></p>
             </div>
             <div class="brain">
@@ -70,20 +74,20 @@
             <p>Number of Matches: 5</p>
             <button type="button" id="start">Ready?</button>
             <button type="button" id="edit">Edit</button>
-            <p class="instructions"></p>
+            <p class="instructions">*Please enter different names for your players.</p>
         </div>
     </form>
     <div id="game">
         <div id="board">
-            <button class="cell"></button>            
-            <button class="cell"></button>            
+            <button class="cell top left"></button>            
+            <button class="cell top"></button>            
+            <button class="cell top right"></button>
+            <button class="cell left"></button>
             <button class="cell"></button>
-            <button class="cell"></button>
-            <button class="cell"></button>
-            <button class="cell"></button>
-            <button class="cell"></button>
-            <button class="cell"></button>
-            <button class="cell"></button>
+            <button class="cell right"></button>
+            <button class="cell bottom left"></button>
+            <button class="cell bottom"></button>
+            <button class="cell bottom right"></button>
             <div id="circles">
                 <div class="circle"></div>
                 <div class="circle"></div>
@@ -106,7 +110,7 @@
         </div>
         <div id="buttons">
             <button id="restart-game">Restart Game</button>
-            <button id="restart-match">Restart Match</button>
+            <button id="restart-match" title="Hover the icon to change the settings">Restart Match</button>
         </div>
     </div>
     <div id="background"></div> 

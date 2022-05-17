@@ -1,23 +1,61 @@
+@font-face {
+    font-family: 'indie_flowerregular';
+    src: url('fonts/indieflower-regular-webfont.woff2') format('woff2'),
+         url('fonts/indieflower-regular-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500&display=swap');
+
+:root {
+    --background: -webkit-radial-gradient(center, ellipse cover,  #15471f 1%,#147c24 100%)
+}
+
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    border: 1px solid black;
+    border: 0px solid #147c24;
+    background: transparent;
+    font-family: 'indie_flowerregular', 'Noto Serif TC', serif;
+    color: white;
 }
-
 
 body {
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
+    background: var(--background);
+    width: 100%;
+    height: 100vh;
+    border: 10px solid saddlebrown;
 }
 
+/*SETTINGS */
 form {
     position: absolute;
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 50px 50px 1fr 50px;
+    gap: 30px;
     width: fit-content;
+    padding: 20px;
+    font-size: 24px;
+}
+
+#icon, #setup, legend {
+    grid-column: 1/3;
+    align-self: center;
+    justify-self: center;
+}
+
+legend {
+    font-size: 50px;
+    font-weight: bold;
+    padding-bottom: 10px;
 }
 
 #edit {
@@ -28,17 +66,55 @@ form {
 form.side {
     top: 0;
     left: 0;
-    transition: ease-in 2s;
+    transition: ease-in 0.2s;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
 form.side > * {
     position: absolute;
     transform: scale(0);
+    transition: ease-in 0.1s;
+    background-color: inherit;
 }
 
 form.side > #icon {
     position: relative;
     transform: scale(1);
+}
+
+form.side:hover {
+    padding: 20px;
+}
+
+#p1-settings, #p2-settings {
+    width: 280px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    justify-items: center;
+    padding: 10px;
+    border: 1px solid white;
+    border-radius: 20px;
+}
+
+select option {
+    background-color: #15471f;
+}
+
+select, option, button {
+    font-size: 24px; 
+}
+
+.level {
+    grid-column: 2/3;
+}
+
+form.side:hover > legend {
+    position: absolute;
+    transform: scale(0);
 }
 
 form.side:hover > *, form.side:hover #edit {
@@ -51,9 +127,75 @@ form.side:hover #start {
     transform: scale(0);
 }
 
+input, select, option, button {
+    cursor: pointer;
+}
+
+input[type="text"] {
+    width: 150px;
+    padding-left: 5px;
+    font-size: 24px;
+    cursor: text;
+}
+
+.character input {
+    width: 30px
+}
+
+#setup, form.side #p1-settings, form.side #p2-settings {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 160px;
+}
+
+#setup {
+    width: auto;
+}
+
+form.side #setup {
+    width: min-content;
+}
+
+button {
+    width: max-content;
+    margin: auto;
+    border-bottom: 3px solid transparent;
+}
+
+form button:hover, #message button:hover, #buttons button:hover {
+    border-bottom: 3px solid white;
+}
+
+.instructions {
+    transform: scale(0);
+    position: absolute;
+    font-size: 14px;
+}
+
+.instructions.active {
+    position: relative;
+    transform: scale(1);
+}
+
+.level {
+    position: absolute;
+    transform: scale(0);
+}
+
+.level.active {
+    position: relative;
+    transform: scale(1);
+}
+
+/*GAME */
+
 #game {
     transform: scale(0);
     transition: ease-in 0.2s;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
 
 #game.active {
@@ -66,14 +208,67 @@ form.side:hover #start {
     grid-template-rows: repeat(3, 1fr);
     height: 400px;
     width: 400px;
+    align-self: center;
+}
+
+.cell {
+    margin: 0;
+    width: auto;
+    border: 5px solid white;
+    font-size: 48px;
+} 
+
+.cell.top {
+    border-top: 0;
+}
+
+.cell.left {
+    border-left: 0;
+}
+
+.cell.right {
+    border-right: 0;
+}
+
+.cell.bottom {
+    border-bottom: 0;
+}
+
+.cell:hover {
+    box-shadow: inset 140px 140px rgb(0 0 0 / 20%);
+}
+
+#circles {
+    position: absolute;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    height: 400px;
+    width: 400px;
+    transform: scale(0);
+}
+
+#circles.active {
+    transform: scale(1);
+}
+
+.circle {
+    border-radius: 50%;
+    margin: 5%;
+    border: 0px;
+}
+
+.circle.active {
+    border: 5px solid white;
 }
 
 #box {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: repeat(2, 1fr);
-    width: 400px;
-    height: 100px;
+    grid-template-rows: 1fr 2fr;
+    width: 650px;
+    font-size: 24px;
+    text-align: center;
 }
 
 #score {
@@ -84,15 +279,16 @@ form.side:hover #start {
     content: "'s Turn";
 }
 
-.instructions {
-    transform: scale(0);
-    position: absolute;
+#p1, #p2 {
+    border-radius: 20px;
 }
 
-.instructions.active {
-    position: relative;
-    transform: scale(1);
+#buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
 }
+
+/*CONFIRMATION */
 
 #confirmation {
     position: absolute;
@@ -118,29 +314,13 @@ form.side:hover #start {
 }
 
 #message {
-    background-color: white;
-}
-
-#circles {
-    position: absolute;
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(3, 1fr);
-    height: 400px;
-    width: 400px;
-    transform: scale(0);
+    grid-template-columns: 160px 160px;
+    background-color: var(--background);
+    align-items: center;
+    font-size: 24px;
 }
 
-#circles.active {
-    transform: scale(1);
-}
-
-.circle {
-    border-radius: 50%;
-    margin: 10%;
-    border: 0px;
-}
-
-.circle.active {
-    border: 5px solid red;
+#message p {
+    grid-column: 1/3;
 }
