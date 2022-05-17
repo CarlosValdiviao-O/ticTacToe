@@ -89,7 +89,7 @@ let gameBoard = (function () {
         cells[i].textContent = '';
         cells[i].disabled = false;
         cells[i].dataset.name = null;
-        circles[i].classList.remove('active');
+        circles[i].style = 'border: 0px';
         }
         circleGrid.classList.remove('active');
     }
@@ -305,17 +305,17 @@ let gameFlow = (function (){
         if (cells[i1].dataset.name == cells[i2].dataset.name && cells[i2].dataset.name == cells[i3].dataset.name) {
             if (cells[i1].dataset.name == one.getName()){
                 winner = one.getName();
-                circles[i1].classList.add('active');
-                circles[i2].classList.add('active');
-                circles[i3].classList.add('active');
+                circles[i1].style = `border: 5px solid ${one.getColor()}`;
+                circles[i2].style = `border: 5px solid ${one.getColor()}`;
+                circles[i3].style = `border: 5px solid ${one.getColor()}`;
                 gameBoard.activateCircles();
                 computer.stopComputer();
             }  
             if (cells[i1].dataset.name == two.getName()) {
                 winner = two.getName();
-                circles[i1].classList.add('active');
-                circles[i2].classList.add('active');
-                circles[i3].classList.add('active');
+                circles[i1].style = `border: 5px solid ${two.getColor()}`;
+                circles[i2].style = `border: 5px solid ${two.getColor()}`;
+                circles[i3].style = `border: 5px solid ${two.getColor()}`;
                 gameBoard.activateCircles();
                 computer.stopComputer();
             }                         
@@ -788,8 +788,3 @@ let computer = (function () {
         play, stopComputer, startComputer, checkWinner
     }
 })();
-
-//change checkwinner 
-
-
-

@@ -142,6 +142,15 @@ input[type="text"] {
     width: 30px
 }
 
+#p1-settings input, #p2-settings input, select {
+    border: 1px solid transparent;
+    border-radius: 15px;
+}
+
+#p1-settings input:hover, #p2-settings input:hover, select:hover {
+    border: 1px solid white;
+}
+
 #setup, form.side #p1-settings, form.side #p2-settings {
     display: flex;
     flex-direction: column;
@@ -258,15 +267,12 @@ form button:hover, #message button:hover, #buttons button:hover {
     border: 0px;
 }
 
-.circle.active {
-    border: 5px solid white;
-}
-
 #box {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     grid-template-rows: 1fr 2fr;
     width: 650px;
+    height: 100px;
     font-size: 24px;
     text-align: center;
 }
