@@ -74,7 +74,7 @@ let gameBoard = (function () {
     }
 
     function checkIndex (e) {
-        let index = cells.indexOf(e.path[0]);
+        let index = cells.indexOf(e.target);
         clickOnCell(index, gameFlow.getData());
         gameFlow.checkWinner();
     } 
